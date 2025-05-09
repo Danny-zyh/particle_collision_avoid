@@ -1,4 +1,3 @@
-# register_env.py
 from gymnasium.envs.registration import register
 
 register(
@@ -10,6 +9,6 @@ register(
         "dt": 0.1,
         "max_speed": 1.0,
         "max_accel": 1.0,
-        "adversaries": None
+        "adversaries": None,
     },
 )

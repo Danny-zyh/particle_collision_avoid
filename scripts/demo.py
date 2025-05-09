@@ -1,24 +1,30 @@
-import time
-import numpy as np
-from itertools import cycle
-import gymnasium as gym
-
 import os
 import sys
-sys.path.append(os.getcwd())
-import env.register_env       
+import time
+from itertools import cycle
 
-from env.adversaries import RandomMover, Chaser, TrajectoryFollower
+import gymnasium as gym
+import numpy as np
+
+sys.path.append(os.getcwd())
+import env.register_env
+from env.adversaries import Chaser, RandomMover, TrajectoryFollower
+
 
 def make_adversaries(window, dt, max_accel, max_speed):
     return [
         RandomMover(0, window, dt, max_accel, max_speed),
-        Chaser(1,  window, dt, max_accel, max_speed),
+        Chaser(1, window, dt, max_accel, max_speed),
         TrajectoryFollower(
-            2, window, dt, max_accel, max_speed,
-            waypoints=cycle(iter([ [1,1], [4,1], [4,4], [1,4] ]))
+            2,
+            window,
+            dt,
+            max_accel,
+            max_speed,
+            waypoints=cycle(iter([[1, 1], [4, 1], [4, 4], [1, 4]])),
         ),
     ]
+
 
 def run_demo(episodes=3):
     window, dt, max_speed, max_accel = 5.0, 0.02, 0.5, 0.1
@@ -31,7 +37,7 @@ def run_demo(episodes=3):
         window=window,
         dt=dt,
         max_speed=max_speed,
-        max_accel=max_accel
+        max_accel=max_accel,
     )
 
     for ep in range(episodes):
@@ -49,6 +55,7 @@ def run_demo(episodes=3):
         print(f" Finished in {steps} steps, reward={reward}\n")
 
     env.close()
+
 
 if __name__ == "__main__":
     run_demo()

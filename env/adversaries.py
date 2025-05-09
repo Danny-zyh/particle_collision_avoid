@@ -1,47 +1,33 @@
-import numpy as np
 from typing import Iterable
 
+import numpy as np
+
+
 class Adversary:
-    def __init__(self, 
-        idx: int,
-        window: float, 
-        dt: float, 
-        max_accel: float, 
-        max_speed: float):
+    def __init__(
+        self, idx: int, window: float, dt: float, max_accel: float, max_speed: float
+    ):
 
         self.idx = idx
         self.dt = dt
         self.window = window
         self.max_speed = max_speed
         self.max_accel = max_accel
-        self.center = np.array([window/2, window/2])
+        self.center = np.array([window / 2, window / 2])
 
     def step(self, states):
         raise NotImplementedError
 
 
 class RandomMover(Adversary):
-    def __init__(self,
-        idx: int,
-        window: float, 
-        dt: float, 
-        max_accel: float, 
-        max_speed: float):
+    def __init__(
+        self, idx: int, window: float, dt: float, max_accel: float, max_speed: float
+    ):
 
         super().__init__(idx, window, dt, max_accel, max_speed)
 
-        self.A = np.array([
-            [1, 0, 1, 0],
-            [0, 1, 0, 1],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0]
-        ])
-        self.B = np.array([
-            [0, 0],
-            [0, 0],
-            [1, 0],
-            [0, 1]
-        ])
+        self.A = np.array([[1, 0, 1, 0], [0, 1, 0, 1], [0, 0, 0, 0], [0, 0, 0, 0]])
+        self.B = np.array([[0, 0], [0, 0], [1, 0], [0, 1]])
 
     def step(self, states):
         own_state = states["adversaries"][self.idx]
@@ -59,27 +45,14 @@ class RandomMover(Adversary):
 
 
 class Chaser(Adversary):
-    def  __init__(self,
-        idx: int,
-        window: float, 
-        dt: float, 
-        max_accel: float, 
-        max_speed: float):
+    def __init__(
+        self, idx: int, window: float, dt: float, max_accel: float, max_speed: float
+    ):
 
         super().__init__(idx, window, dt, max_accel, max_speed)
 
-        self.A = np.array([
-            [1, 0, 1, 0],
-            [0, 1, 0, 1],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0]
-        ])
-        self.B = np.array([
-            [0, 0],
-            [0, 0],
-            [1, 0],
-            [0, 1]
-        ])
+        self.A = np.array([[1, 0, 1, 0], [0, 1, 0, 1], [0, 0, 0, 0], [0, 0, 0, 0]])
+        self.B = np.array([[0, 0], [0, 0], [1, 0], [0, 1]])
 
     def step(self, states):
         own_state = states["adversaries"][self.idx]
@@ -97,28 +70,20 @@ class Chaser(Adversary):
 
 
 class TrajectoryFollower(Adversary):
-    def  __init__(self,
+    def __init__(
+        self,
         idx: int,
-        window: float, 
-        dt: float, 
-        max_accel: float, 
+        window: float,
+        dt: float,
+        max_accel: float,
         max_speed: float,
-        waypoints: Iterable):
+        waypoints: Iterable,
+    ):
 
         super().__init__(idx, window, dt, max_accel, max_speed)
         self.waypoints = waypoints
-        self.A = np.array([
-            [1, 0, 1, 0],
-            [0, 1, 0, 1],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0]
-        ])
-        self.B = np.array([
-            [0, 0],
-            [0, 0],
-            [1, 0],
-            [0, 1]
-        ])
+        self.A = np.array([[1, 0, 1, 0], [0, 1, 0, 1], [0, 0, 0, 0], [0, 0, 0, 0]])
+        self.B = np.array([[0, 0], [0, 0], [1, 0], [0, 1]])
 
     def step(self, states):
         own_state = states["adversaries"][self.idx]
