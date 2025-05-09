@@ -15,7 +15,7 @@ def make_adversaries(window, dt, max_accel, max_speed):
         RandomMover(0, window, dt, max_accel, max_speed),
         Chaser(1,  window, dt, max_accel, max_speed),
         TrajectoryFollower(
-            1, window, dt, max_accel, max_speed,
+            2, window, dt, max_accel, max_speed,
             waypoints=cycle(iter([ [1,1], [4,1], [4,4], [1,4] ]))
         ),
     ]
