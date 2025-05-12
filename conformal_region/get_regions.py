@@ -25,8 +25,14 @@ class ConformalRegion:
             self.n_traj, self.traj_len, self.state_dim = self.traj.shape
         else:
             self.n_agents, self.n_traj, self.traj_len, self.state_dim = self.traj.shape
+            
+    def _get_conformity_scores(self, t, tau):
+        if self.single_agent:
+            return self.get_single_agent_nonconformity_scores(t, tau)
+        else:
+            return self.get_multi_agent_nonconformity_scores(t, tau)
 
-    def get_single_agent_nonconformity_scores(self, t, tau):
+    def _get_single_agent_nonconformity_scores(self, t, tau):
         """
         For each trajectory, the nonconformity score for prediction tau at time t is
         the distance between the predicted state and the actual state of the trajectory at time t+tau.
@@ -39,7 +45,6 @@ class ConformalRegion:
             np.ndarray: The nonconformity scores for each trajectory.
         """
         
-        assert self.single_agent, "This method is for single agent only"
         assert tau < self.pred_horizon, "tau must be less than pred_horizon"
         assert t + tau < self.traj_len, "t + tau must be less than traj_len"
         
@@ -49,7 +54,7 @@ class ConformalRegion:
         
         return nonconformity_scores
     
-    def get_multi_agent_nonconformity_scores(self, t, tau):
+    def _get_multi_agent_nonconformity_scores(self, t, tau):
         """
         For each trajectory, the multi-agent nonconformity score for prediction tau at time t is the maximum distance
         between the predicted state and the actual state of the trajectory at time t+tau across all agents.
@@ -62,7 +67,6 @@ class ConformalRegion:
             np.ndarray: The nonconformity scores for each trajectory.
         """
         
-        assert not self.single_agent, "This method is for multi-agent only"
         assert tau < self.pred_horizon, "tau must be less than pred_horizon"
         assert t + tau < self.traj_len, "t + tau must be less than traj_len"
         
@@ -86,7 +90,7 @@ class ConformalRegion:
             float: The valid prediction region for (t, tau).
         """
         # Get the nonconformity scores for the trajectories
-        nonconformity_scores = self.get_single_agent_nonconformity_scores(t, tau)
+        nonconformity_scores = self.get_conformity_scores(t, tau)
         # Sort the nonconformity scores
         sorted_scores = np.sort(nonconformity_scores)
         # Add infinity to the end of the sorted scores
