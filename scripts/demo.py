@@ -12,22 +12,11 @@ from env.adversaries import Chaser, RandomMover, TrajectoryFollower
 
 
 def make_adversaries(window, dt, max_accel, max_speed):
-    return [
-        RandomMover(0, window, dt, max_accel, max_speed),
-        Chaser(1, window, dt, max_accel, max_speed),
-        TrajectoryFollower(
-            2,
-            window,
-            dt,
-            max_accel,
-            max_speed,
-            waypoints=cycle(iter([[1, 1], [4, 1], [4, 4], [1, 4]])),
-        ),
-    ]
+    return [RandomMover(i, window, dt, max_accel, max_speed) for i in range(3)]
 
 
 def run_demo(episodes=3):
-    window, dt, max_speed, max_accel = 5.0, 0.02, 0.5, 0.1
+    window, dt, max_speed, max_accel = 5.0, 0.1, 1, 0.5
     adversaries = make_adversaries(window, dt, max_accel, max_speed)
 
     # now "ReachAvoid-v0" is registered

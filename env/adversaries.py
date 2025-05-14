@@ -26,8 +26,15 @@ class RandomMover(Adversary):
 
         super().__init__(idx, window, dt, max_accel, max_speed)
 
-        self.A = np.array([[1, 0, 1, 0], [0, 1, 0, 1], [0, 0, 0, 0], [0, 0, 0, 0]])
-        self.B = np.array([[0, 0], [0, 0], [1, 0], [0, 1]])
+        self.A = np.array(
+            [
+                [1, 0, dt, 0],
+                [0, 1, 0, dt],
+                [0, 0, 1, 0],
+                [0, 0, 0, 1],
+            ]
+        )
+        self.B = np.array([[0, 0], [0, 0], [dt, 0], [0, dt]])
 
     def step(self, states):
         own_state = states["adversaries"][self.idx]
@@ -51,8 +58,15 @@ class Chaser(Adversary):
 
         super().__init__(idx, window, dt, max_accel, max_speed)
 
-        self.A = np.array([[1, 0, 1, 0], [0, 1, 0, 1], [0, 0, 0, 0], [0, 0, 0, 0]])
-        self.B = np.array([[0, 0], [0, 0], [1, 0], [0, 1]])
+        self.A = np.array(
+            [
+                [1, 0, dt, 0],
+                [0, 1, 0, dt],
+                [0, 0, 1, 0],
+                [0, 0, 0, 1],
+            ]
+        )
+        self.B = np.array([[0, 0], [0, 0], [dt, 0], [0, dt]])
 
     def step(self, states):
         own_state = states["adversaries"][self.idx]
@@ -82,8 +96,15 @@ class TrajectoryFollower(Adversary):
 
         super().__init__(idx, window, dt, max_accel, max_speed)
         self.waypoints = waypoints
-        self.A = np.array([[1, 0, 1, 0], [0, 1, 0, 1], [0, 0, 0, 0], [0, 0, 0, 0]])
-        self.B = np.array([[0, 0], [0, 0], [1, 0], [0, 1]])
+        self.A = np.array(
+            [
+                [1, 0, dt, 0],
+                [0, 1, 0, dt],
+                [0, 0, 1, 0],
+                [0, 0, 0, 1],
+            ]
+        )
+        self.B = np.array([[0, 0], [0, 0], [dt, 0], [0, dt]])
 
     def step(self, states):
         own_state = states["adversaries"][self.idx]

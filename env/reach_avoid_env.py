@@ -14,8 +14,8 @@ class ReachAvoidEnv(gym.Env):
         adversaries: List[Adversary],
         window: float = 5.0,
         dt: float = 0.1,
-        max_speed: float = 0.1,
-        max_accel: float = 0.1,
+        max_speed: float = 1,
+        max_accel: float = 1,
     ):
         super().__init__()
         # TODO: write everything in a config file
@@ -49,8 +49,8 @@ class ReachAvoidEnv(gym.Env):
 
         # A simple double integrator
         # TODO: write dynamic system to config
-        self.A = np.array([[1, 0, 1, 0], [0, 1, 0, 1], [0, 0, 0, 0], [0, 0, 0, 0]])
-        self.B = np.array([[0, 0], [0, 0], [1, 0], [0, 1]])
+        self.A = np.array([[1, 0, dt, 0], [0, 1, 0, dt], [0, 0, 1, 0], [0, 0, 0, 1]])
+        self.B = np.array([[0, 0], [0, 0], [dt, 0], [0, dt]])
 
         self.reset()
 
@@ -64,19 +64,30 @@ class ReachAvoidEnv(gym.Env):
             a_max=[self.window] * 2 + [self.max_speed] * 2,
         )
 
-    def reset(self, *, seed=None, options=None):
+    def reset(self, seed=None, options=None):
         super().reset(seed=seed)
         self.states["agent"] = np.array(
-            [1, 1, 0, 0]
+            [0.5, 0.5, 0, 0]
         )  # TODO: write start state in config
+
+        options = options if options else dict()
+        adv_pos = options.get("adv_pos", None)
+        if adv_pos is None:
+            # random initialization
+            adv_pos = np.random.uniform(0, self.window, size=(self.num_adversaries, 2))
+        else:
+            assert isinstance(adv_pos, np.ndarray) and adv_pos.shape == (
+                self.num_adversaries,
+                2,
+            ), "adv_pos is an ndarray with shape (num_adv, 2)"
 
         for i in range(self.num_adversaries):
             self.states["adversaries"][i] = np.array(
-                [self.window, self.window, 0, 0]
+                [*adv_pos[i], 0, 0]
             )  # TODO: write start state in config
 
         self.states["landmark"][:2] = np.array(
-            [self.window / 2, self.window / 2]
+            [self.window - 0.5, self.window - 0.5]
         )  # TODO: write landmark position to config
         return self.states, {}
 
@@ -106,7 +117,7 @@ class ReachAvoidEnv(gym.Env):
 
         for adv in adv_next_states:
             distance_to_adv = np.linalg.norm(agent_next_state - adv)
-            if distance_to_adv < 0.1:  # TODO: add adv check to config
+            if distance_to_adv < 0.2:  # TODO: add adv check to config
                 done = True
                 reward = -1
         return self.states, reward, done, False, {}
