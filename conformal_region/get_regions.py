@@ -92,7 +92,7 @@ class ConformalRegion:
         # Add infinity to the end of the sorted scores
         sorted_scores = np.append(sorted_scores, np.inf)
         # Compute the index for the valid prediction region
-        index = int(np.floor((1 - self.failure_rate) * (self.n_traj + 1)))
+        index = int(np.ceil((1 - self.failure_rate) * (self.n_traj + 1)))
         # Get the valid prediction region
         valid_region = sorted_scores[index]
 
