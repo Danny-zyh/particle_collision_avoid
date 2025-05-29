@@ -19,7 +19,6 @@ def run_demo(episodes=3):
     window, dt, max_speed, max_accel = 5.0, 0.1, 1, 0.5
     adversaries = make_adversaries(window, dt, max_accel, max_speed)
 
-    # now "ReachAvoid-v0" is registered
     env = gym.make(
         "ReachAvoid-v0",
         adversaries=adversaries,

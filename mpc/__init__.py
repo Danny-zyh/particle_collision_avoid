@@ -1,1 +1,1 @@
-from .solver import MPCSolver
+from .solver import MPCSolver, MIMPCSolver

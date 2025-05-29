@@ -117,7 +117,7 @@ class ReachAvoidEnv(gym.Env):
 
         for adv in adv_next_states:
             distance_to_adv = np.linalg.norm(agent_next_state - adv)
-            if distance_to_adv < 0.2:  # TODO: add adv check to config
+            if distance_to_adv < 0.4:  # TODO: add adv check to config
                 done = True
                 reward = -1
         return self.states, reward, done, False, {}
