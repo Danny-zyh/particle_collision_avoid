@@ -41,7 +41,7 @@ class ConformalRegion:
             np.ndarray: The nonconformity scores for each trajectory.
         """
 
-        assert tau < self.pred_horizon, "tau must be less than pred_horizon"
+        assert tau < self.pred_horizon, f"tau must be less than pred_horizon, but got {tau} < {self.pred_horizon}"
         assert t + tau < self.traj_len, "t + tau must be less than traj_len"
 
         pred_state = self.pred[:, t, tau, :]
