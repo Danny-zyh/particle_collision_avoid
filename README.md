@@ -20,3 +20,6 @@ This repository implements the *Safe Planning in Dynamic Environment using Confo
 
 ### Play
 - `python scripts/demo.py`
+
+### Run benchmark
+- `python script/benchmark.py` experiment results will be available under `/test

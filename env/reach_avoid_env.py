@@ -111,12 +111,12 @@ class ReachAvoidEnv(gym.Env):
         reward = 0
         done = False
         distance_to_goal = np.linalg.norm(agent_next_state - self.states["landmark"])
-        if distance_to_goal < 0.1:  # TODO: add success check to config
+        if distance_to_goal < 0.2:  # TODO: add success check to config
             done = True
             reward = 1
 
         for adv in adv_next_states:
-            distance_to_adv = np.linalg.norm(agent_next_state - adv)
+            distance_to_adv = np.linalg.norm(agent_next_state[:2] - adv[:2])
             if distance_to_adv < 0.4:  # TODO: add adv check to config
                 done = True
                 reward = -1
