@@ -214,21 +214,10 @@ class MIMPCSolver(MPCSolver):
         acc_bound: float,
         dt: float = 1.0,
     ):
-        super().__init__(
-            A,
-            B,
-            Q,
-            R,
-            horizon,
-            pos_bound,
-            vel_bound,
-            acc_bound,
-            dt,
-            cp.SCIP,
-            verbose=False,
-        )
+        super().__init__(A, B, Q, R, horizon, pos_bound, vel_bound, acc_bound, dt)
         self.M = 1e5
         self.eps = 1e-3
+        self.solver = cp.SCIP
 
     def solve(
         self,

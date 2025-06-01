@@ -5,9 +5,13 @@ from matplotlib.patches import Circle
 from IPython.display import HTML
 
 
-def animate_trajectory(simulation_trajectory, xlim=(0, 5), ylim=(0, 5), interval=200):
+def animate_trajectory(
+    simulation_trajectory, xlim=(0, 5), ylim=(0, 5), interval=200, radii=0.4
+):
     n_steps = len(simulation_trajectory)
-    agent_pos = np.array([step["agent"][:2] for step in simulation_trajectory])
+    agent_pos = np.array(
+        [step["agent"][:2] for step in simulation_trajectory]
+    )  # (n_steps, 2)
     landmark = simulation_trajectory[0]["landmark"][:2]
     m = len(simulation_trajectory[0]["adversaries"])
     adv_pos = np.stack(
@@ -16,12 +20,14 @@ def animate_trajectory(simulation_trajectory, xlim=(0, 5), ylim=(0, 5), interval
             for i in range(m)
         ],
         axis=1,
-    )
+    )  # shape (n_steps, m, 2)
 
     fig, ax = plt.subplots()
     ax.set_xlim(*xlim)
     ax.set_ylim(*ylim)
     ax.set_aspect("equal")
+
+    # scatter plots
     agent_scatter = ax.scatter([], [], c="blue", s=50, label="Agent")
     adv_scatter = ax.scatter([], [], c="red", s=50, label="Adversaries")
     landmark_scatter = ax.scatter(
@@ -29,19 +35,44 @@ def animate_trajectory(simulation_trajectory, xlim=(0, 5), ylim=(0, 5), interval
     )
     ax.legend(loc="upper left")
 
+    # create one Circle patch per adversary
+    circles = []
+    for i in range(m):
+        c = Circle(
+            (np.nan, np.nan),  # initial off‐screen
+            radii,
+            fill=False,
+            edgecolor="red",
+            linewidth=1,
+        )
+        ax.add_patch(c)
+        circles.append(c)
+
     def init():
-        # <-- use (0,2) empty arrays, not []
         agent_scatter.set_offsets(np.empty((0, 2)))
         adv_scatter.set_offsets(np.empty((0, 2)))
-        return agent_scatter, adv_scatter, landmark_scatter
+        # hide all circles initially
+        for c in circles:
+            c.center = (np.nan, np.nan)
+        return [agent_scatter, adv_scatter, landmark_scatter] + circles
 
     def update(frame):
+        # update scatter positions
         agent_scatter.set_offsets(agent_pos[frame])
         adv_scatter.set_offsets(adv_pos[frame])
-        return agent_scatter, adv_scatter, landmark_scatter
+
+        # update each circle's center
+        for i, c in enumerate(circles):
+            c.center = tuple(adv_pos[frame, i])
+        return [agent_scatter, adv_scatter, landmark_scatter] + circles
 
     anim = FuncAnimation(
-        fig, update, frames=n_steps, init_func=init, blit=True, interval=interval
+        fig,
+        update,
+        frames=n_steps,
+        init_func=init,
+        blit=True,
+        interval=interval,
     )
     plt.close(fig)
     return HTML(anim.to_jshtml())
