@@ -7,6 +7,7 @@ from tqdm import tqdm
 from dataclasses import dataclass
 import cvxpy as cp
 import time
+import csv
 
 import sys
 
@@ -18,6 +19,12 @@ import env.register_env
 from mpc import MPCSolver
 from mppi import MPPISolver
 from utils import animate_trajectory, animate_with_predictions
+
+
+import warnings
+
+# ignore all UserWarning messages coming from CVXPY
+warnings.filterwarnings("ignore", category=UserWarning, module="cvxpy.*")
 
 
 @dataclass
@@ -307,19 +314,55 @@ def evaluate_solver(config: Config, solver_type: str, init_positions: np.ndarray
 
 
 if __name__ == "__main__":
-    config = Config()
-    config.n_episodes = 10  # you can override this as needed
+    # --- Experiment settings ---
+    OBST_COUNTS = [3, 5, 7, 9]  # number of RandomMover adversaries to try
+    N_EPISODES_PER_COUNT = 20
 
-    # Pre-generate init positions for fair evaluation
-    n_adv = config.n_chasers + config.n_random_movers + config.n_random_chasers
-    init_positions = np.random.uniform(
-        0, config.window, size=(config.n_episodes, n_adv, 2)
-    )
+    # Base config: no chasers, no random chasers—only RandomMovers will be used
+    base_config = Config()
+    base_config.n_chasers = 0
+    base_config.n_random_chasers = 0
+    # We will override n_random_movers below in the loop
 
-    results = {}
-    for solver in ["mpc", "mppi"]:
-        results[solver] = evaluate_solver(config, solver, init_positions)
+    results_dict = {"mpc": {}, "mppi": {}}
 
-    print("\n=== Final Summary ===")
-    for solver, rate in results.items():
-        print(f"{solver.upper()} success rate: {rate:.2%}")
+    for obs_count in OBST_COUNTS:
+        # 1) Clone base_config and set the number of RandomMovers
+        config = copy.deepcopy(base_config)
+        config.n_random_movers = obs_count
+        config.n_episodes = N_EPISODES_PER_COUNT
+
+        # 2) Pre-generate init positions for *this* experiment
+        #    Each RandomMover needs an (x,y) start point, so shape = (episodes, obs_count, 2)
+        n_adv = config.n_random_movers
+        init_positions = np.random.uniform(
+            0,
+            config.window,
+            size=(config.n_episodes, n_adv, 2),
+        )
+
+        print(f"\n=== Running experiments with n_random_movers = {obs_count} ===")
+        for solver_name in ["mpc", "mppi"]:
+            rate = evaluate_solver(config, solver_name, init_positions)
+            # Store under the obstacle count key
+            results_dict[solver_name][obs_count] = rate
+
+    # 3) Print a final table of results
+    print("\n=== Summary over all obstacle‐counts ===")
+    for solver_name in ["mpc", "mppi"]:
+        print(f"\nSolver: {solver_name.upper()}")
+        for obs_count in OBST_COUNTS:
+            rate = results_dict[solver_name][obs_count]
+            print(f"  n_random_movers = {obs_count:>2} → success rate: {rate:.2%}")
+
+    # 4) Write the results to a CSV file
+    csv_path = os.path.join(os.getcwd(), "results.csv")
+    with open(csv_path, "w", newline="") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["solver", "n_random_movers", "success_rate"])
+        for solver_name in ["mpc", "mppi"]:
+            for obs_count in OBST_COUNTS:
+                rate = results_dict[solver_name][obs_count]
+                writer.writerow([solver_name, obs_count, rate])
+
+    print(f"\nResults have been saved to: {csv_path}")

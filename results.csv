@@ -1,0 +1,9 @@
+solver,n_random_movers,success_rate
+mpc,3,0.75
+mpc,5,0.6
+mpc,7,0.35
+mpc,9,0.15
+mppi,3,0.45
+mppi,5,0.3
+mppi,7,0.05
+mppi,9,0.2
